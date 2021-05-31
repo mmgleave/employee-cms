@@ -32,6 +32,14 @@ const addDepartmentPrompt = () => {
     ])
 };
 
+// mysql for adding a department
+const addDepartmentMySql = (name) => {
+  const sql = `INSERT INTO departments (name) VALUES (?)`;
+  const params = (name);
+
+  db.query(sql, params);
+}
+
 // prompt for adding a role (dependent on department)
 const addRolePrompt = () => {
   return inquirer.prompt([
@@ -146,7 +154,8 @@ const updateRolePrompt = () => {
 const addDepartment = () => {
   addDepartmentPrompt()
     .then((departmentPromptAnswer) => {
-      console.log(departmentPromptAnswer)
+      console.log(departmentPromptAnswer.addDepartment)
+      addDepartmentMySql(departmentPromptAnswer.addDepartment);
     })
 };
 
@@ -192,12 +201,16 @@ const userChoice = (choice) => {
   switch(choice.init){
     case 'View all departments':
       console.log('User selected: ' + 1);
+      break;
     case 'View all roles':
       console.log('User selected: ' + 2);
+      break;
     case 'View all employees':
       console.log('User selected: ' + 3);
+      break;
     case 'Add a department':
       addDepartment();
+      break;
     case 'Add a role':
       addRole();
       break;
