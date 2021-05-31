@@ -1,0 +1,25 @@
+{
+  "name": "employee-cms",
+  "version": "1.0.0",
+  "description": "employee database command-line application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmgleave/employee-cms.git"
+  },
+  "author": "mmgleave",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmgleave/employee-cms/issues"
+  },
+  "homepage": "https://github.com/mmgleave/employee-cms#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.1.0",
+    "mysql2": "^2.2.5"
+  }
+}
