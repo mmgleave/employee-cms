@@ -53,7 +53,7 @@ const addDepartment = () => {
 
 // view all dept func
 const viewAllDepartments = () => {
-  const sql = `SELECT name AS department_name FROM departments`
+  const sql = `SELECT id, name AS department_name FROM departments`
 
   db.query(sql, (err, rows) => {
     if(err) {
@@ -125,7 +125,10 @@ const addRole = () => {
 
 // view all roles func
 const viewAllRoles = () => {
-  const sql = `SELECT title AS role_title FROM roles`
+  const sql = `
+    SELECT roles.id, roles.title, roles.salary, departments.name AS department FROM roles
+    LEFT JOIN departments ON departments.id = roles.department_id
+    `
 
   db.query(sql, (err, rows) => {
     if(err) {
