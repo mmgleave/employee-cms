@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const cTable = require('console.table');
+const consoleTable = require('console.table');
 
 // Connect to database
 const db = mysql.createConnection(
@@ -13,7 +13,9 @@ const db = mysql.createConnection(
     console.log('Connected to the company database.')
   );
 
-  // prompt for adding a department
+  // **DEPARTMENTS**
+
+  // add dept inq prompt
 const addDepartmentPrompt = () => {
     return inquirer.prompt([
         {
@@ -32,15 +34,40 @@ const addDepartmentPrompt = () => {
     ])
 };
 
-// mysql for adding a department
+// add dept mysql
 const addDepartmentMySql = (name) => {
   const sql = `INSERT INTO departments (name) VALUES (?)`;
   const params = (name);
 
   db.query(sql, params);
-}
+};
 
-// prompt for adding a role (dependent on department)
+// add dept func
+const addDepartment = () => {
+  addDepartmentPrompt()
+    .then((departmentPromptAnswer) => {
+      console.log(departmentPromptAnswer.addDepartment)
+      addDepartmentMySql(departmentPromptAnswer.addDepartment);
+    })
+};
+
+// view all dept func
+const viewAllDepartments = () => {
+  const sql = `SELECT name AS department_name FROM departments`
+
+  db.query(sql, (err, rows) => {
+    if(err) {
+      throw(err)
+    } else {
+      const table = consoleTable.getTable(rows)
+      console.log(table);
+    }
+  })
+};
+
+// **ROLES** (all dependent on departments table)
+
+// add role inq prompt
 const addRolePrompt = () => {
   return inquirer.prompt([
       {
@@ -80,7 +107,39 @@ const addRolePrompt = () => {
   ])
 };
 
-// prompt for adding an employee (dependent on department and role)
+// add role mysql
+const addRoleMySql = (roleInfo) => {
+  const sql = `INSERT INTO roles (name, salary, department_id) VALUES (?, ?, ?)`;
+  const params = (roleInfo.roleNameInput, roleInfo.roleSalaryInput, roleInfo.roleDepartment);
+
+  db.query(sql, params);
+};
+
+// add role func
+const addRole = () => {
+  addRolePrompt()
+    .then((rolePromptAnswers) => {
+      addRoleMySql(rolePromptAnswers)
+    })
+};
+
+// view all roles func
+const viewAllRoles = () => {
+  const sql = `SELECT title AS role_title FROM roles`
+
+  db.query(sql, (err, rows) => {
+    if(err) {
+      throw(err)
+    } else {
+      const table = consoleTable.getTable(rows)
+      console.log(table);
+    }
+  })
+};
+
+// **EMPLOYEES** (all dependent on departments table and roles table)
+
+// add employee inq prompt
 const addEmployeePrompt = () => {
   return inquirer.prompt([
       {
@@ -128,7 +187,39 @@ const addEmployeePrompt = () => {
   ])
 };
 
-// prompt to update role (dependent on employee and role)
+// add employee mysql
+const addEmployeeMySql = (employeeInfo) => {
+  const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+  const params = (employeeInfo.employeeFirstNameInput, employeeInfo.employeeLastNameInput, employeeInfo.employeeRole, employeeInfo.employeeManager);
+
+  db.query(sql, params);
+};
+
+// add employee func
+const addEmployee = () => {
+  addEmployeePrompt()
+    .then((addEmployeePromptAnswers) => {
+      addEmployeeMySql(addEmployeePromptAnswers)
+    })
+};
+
+// view all employees func
+const viewAllEmployees = () => {
+  const sql = `SELECT first_name, last_name, role_id, manager_id FROM employees`;
+
+  db.query(sql, (err, rows) => {
+    if(err) {
+      throw(err)
+    } else {
+      const table = consoleTable.getTable(rows)
+      console.log(table);
+    }
+  })
+};
+
+// **UPDATE ROLE** (all dependent on departments table, employees table, and roles table)
+
+// inq prompt to update role
 const updateRolePrompt = () => {
   return inquirer.prompt([
       {
@@ -150,32 +241,9 @@ const updateRolePrompt = () => {
   ])
 };
 
-// function for adding a department
-const addDepartment = () => {
-  addDepartmentPrompt()
-    .then((departmentPromptAnswer) => {
-      console.log(departmentPromptAnswer.addDepartment)
-      addDepartmentMySql(departmentPromptAnswer.addDepartment);
-    })
-};
+// **INITIAL PROMPTS**
 
-// function for adding a role (dependent on department)
-const addRole = () => {
-  addRolePrompt()
-    .then((rolePromptAnswers) => {
-      console.log(rolePromptAnswers)
-    })
-};
-
-// function for adding an employee (dependent on department and role)
-const addEmployee = () => {
-  addEmployeePrompt()
-    .then((employeePromptAnswers) => {
-      console.log(employeePromptAnswers)
-    })
-};
-
-  // initial prompt for user's choice for activity
+  // step one: initial prompt for user's choice for activity
   const initPrompt = () => {
     return inquirer.prompt([
         {
@@ -195,18 +263,17 @@ const addEmployee = () => {
     ])
 };
 
-
-// next step depending on user choice for activity
+// step two: (dependent on user's choice for activity from initPrompt)
 const userChoice = (choice) => {
   switch(choice.init){
     case 'View all departments':
-      console.log('User selected: ' + 1);
+      viewAllDepartments();
       break;
     case 'View all roles':
-      console.log('User selected: ' + 2);
+      viewAllRoles();
       break;
     case 'View all employees':
-      console.log('User selected: ' + 3);
+      viewAllEmployees();
       break;
     case 'Add a department':
       addDepartment();
@@ -221,7 +288,7 @@ const userChoice = (choice) => {
       updateRole();
       break;
   }
-}
+};
 
 initPrompt()
   .then((choice) => {
