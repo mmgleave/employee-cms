@@ -1,6 +1,6 @@
 -- departments defaults
 INSERT INTO departments 
-    (name)
+    (title)
 VALUES
     ('Production'),
     ('Research and Development'),
