@@ -15,8 +15,6 @@ const db = mysql.createConnection(
 
 // **DEPARTMENTS**
 
-const departmentList = [];
-
 // add dept inq prompt
 const addDepartmentPrompt = () => {
   return inquirer.prompt([
@@ -48,9 +46,10 @@ const addDepartmentMySql = (title) => {
 const addDepartment = () => {
   addDepartmentPrompt()
     .then((departmentPromptAnswer) => {
-      console.log(departmentPromptAnswer.addDepartment)
+      console.log('Added Department: ' + departmentPromptAnswer.addDepartment)
       addDepartmentMySql(departmentPromptAnswer.addDepartment);
-    })
+    });
+  startApp();
 };
 
 // view all dept func
@@ -63,29 +62,23 @@ const viewAllDepartments = () => {
     } else {
       const table = consoleTable.getTable(rows)
       console.log(table);
+      startApp();
     }
   })
 };
 
 // **ROLES** (all dependent on departments table)
 
-// get existing departments and add to an array
-const getDepartmentList = () => {
-  const sql = `SELECT * FROM departments`
-  db.query(sql, (err, rows) => {
-    if (err) {
-      throw (err)
-    } else {
-      for(i=0; i<rows.length; i++) {
-        departmentList.push(rows[i].title);
-      }
+// add a new role (async)
+const addRole = async () => {
+  const getDepartments = await db.promise().query(`SELECT * FROM departments`)
+  let departmentList = getDepartments[0].map((titles) => {
+    return {
+      name: titles.title,
+      value: titles.id
     }
   })
-};
-
-// add role inq prompt
-const addRolePrompt = () => {
-  return inquirer.prompt([
+  const addRolePrompt = await inquirer.prompt([
     {
       type: 'input',
       name: 'roleTitle',
@@ -119,26 +112,16 @@ const addRolePrompt = () => {
       choices: departmentList
     }
   ])
-};
+  .then(addRoleAnswers => {
+    const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
+    const params = [addRoleAnswers.roleTitle, addRoleAnswers.roleSalary, addRoleAnswers.roleDepartment]
 
-
-// add role mysql
-const addRoleMySql = (roleInfo) => {
-  console.log(typeof(roleInfo.roleDepartment));
-  const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
-  const params = (roleInfo.roleTitle, roleInfo.roleSalary, roleInfo.roleDepartment);
-
-  db.query(sql, params)
-};
-
-// add role func
-const addRole = () => {
-  getDepartmentList()
-  addRolePrompt()
-  .then((rolePromptAnswers) => {
-    addRoleMySql(rolePromptAnswers)
+    db.query(sql, params);
+    console.log('Added Role: ' + addRoleAnswers.roleTitle)
+    startApp();
   })
 };
+
 
 // view all roles func
 const viewAllRoles = () => {
@@ -153,15 +136,30 @@ const viewAllRoles = () => {
     } else {
       const table = consoleTable.getTable(rows)
       console.log(table);
+      startApp();
     }
   })
 };
 
 // **EMPLOYEES** (all dependent on departments table and roles table)
 
-// add employee inq prompt
-const addEmployeePrompt = () => {
-  return inquirer.prompt([
+// add a new employee (async)
+const addEmployee = async () => {
+  const getRoles = await db.promise().query(`SELECT * FROM roles`)
+  let roleList = getRoles[0].map((titles) => {
+    return {
+      name: titles.title,
+      value: titles.id
+    }
+  })
+  const getEmployees = await db.promise().query(`SELECT * FROM employees`)
+  let employeeList = getEmployees[0].map((names) => {
+    return {
+      name: (names.employeeFirstName) + ' ' + (names.employeeLastName),
+      value: names.id
+    }
+  })
+  const addEmployeePrompt = await inquirer.prompt([
     {
       type: 'input',
       name: 'employeeFirstName',
@@ -192,35 +190,23 @@ const addEmployeePrompt = () => {
       type: 'list',
       name: 'employeeRole',
       message: 'Employee Role: ',
-      choices: [
-        // array of names of existing roles?
-      ]
+      choices: roleList
     },
     {
       type: 'list',
       name: 'employeeManager',
       message: 'Employee Manager: ',
-      choices: [
-        // array of names of existing employees and also a choice for none?
-      ]
+      choices: employeeList
     }
   ])
-};
+  .then(addEmployeeAnswers => {
+    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    const params = [addEmployeeAnswers.employeeFirstName, addEmployeeAnswers.employeeLastName, addEmployeeAnswers.employeeRole, addEmployeeAnswers.employeeManager]
 
-// add employee mysql
-const addEmployeeMySql = (employeeInfo) => {
-  const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-  const params = (employeeInfo.employeeFirstNameInput, employeeInfo.employeeLastNameInput, employeeInfo.employeeRole, employeeInfo.employeeManager);
-
-  db.query(sql, params);
-};
-
-// add employee func
-const addEmployee = () => {
-  addEmployeePrompt()
-    .then((addEmployeePromptAnswers) => {
-      addEmployeeMySql(addEmployeePromptAnswers)
-    })
+    db.query(sql, params);
+    console.log('Added Employee: ' + addEmployeeAnswers.employeeFirstName + ' ' + addEmployeeAnswers.employeeLastName)
+    startApp();
+  })
 };
 
 // view all employees func
@@ -233,6 +219,7 @@ const viewAllEmployees = () => {
     } else {
       const table = consoleTable.getTable(rows)
       console.log(table);
+      startApp();
     }
   })
 };
@@ -310,7 +297,11 @@ const userChoice = (choice) => {
   }
 };
 
-initPrompt()
-  .then((choice) => {
-    userChoice(choice);
-  })
+const startApp = () => {
+  initPrompt()
+    .then((choice) => {
+      userChoice(choice);
+    })
+};
+
+startApp();
