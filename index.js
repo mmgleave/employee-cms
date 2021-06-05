@@ -48,8 +48,8 @@ const addDepartment = () => {
     .then((departmentPromptAnswer) => {
       console.log('Added Department: ' + departmentPromptAnswer.addDepartment)
       addDepartmentMySql(departmentPromptAnswer.addDepartment);
+      startApp();
     });
-  startApp();
 };
 
 // view all dept func
@@ -145,6 +145,14 @@ const viewAllRoles = () => {
 
 // add a new employee (async)
 const addEmployee = async () => {
+  const getEmployees = await db.promise().query(`SELECT * FROM employees`)
+  let employeeList = getEmployees[0].map((employeeNames) => {
+    return {
+      name: employeeNames.first_name.concat(" ", employeeNames.last_name),
+      value: employeeNames.id
+    }
+  })
+
   const getRoles = await db.promise().query(`SELECT * FROM roles`)
   let roleList = getRoles[0].map((titles) => {
     return {
@@ -152,13 +160,8 @@ const addEmployee = async () => {
       value: titles.id
     }
   })
-  const getEmployees = await db.promise().query(`SELECT * FROM employees`)
-  let employeeList = getEmployees[0].map((names) => {
-    return {
-      name: (names.employeeFirstName) + ' ' + (names.employeeLastName),
-      value: names.id
-    }
-  })
+
+  
   const addEmployeePrompt = await inquirer.prompt([
     {
       type: 'input',
@@ -199,6 +202,7 @@ const addEmployee = async () => {
       choices: employeeList
     }
   ])
+
   .then(addEmployeeAnswers => {
     const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
     const params = [addEmployeeAnswers.employeeFirstName, addEmployeeAnswers.employeeLastName, addEmployeeAnswers.employeeRole, addEmployeeAnswers.employeeManager]
