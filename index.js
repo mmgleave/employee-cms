@@ -112,16 +112,15 @@ const addRole = async () => {
       choices: departmentList
     }
   ])
-  .then(addRoleAnswers => {
-    const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
-    const params = [addRoleAnswers.roleTitle, addRoleAnswers.roleSalary, addRoleAnswers.roleDepartment]
+    .then(addRoleAnswers => {
+      const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
+      const params = [addRoleAnswers.roleTitle, addRoleAnswers.roleSalary, addRoleAnswers.roleDepartment]
 
-    db.query(sql, params);
-    console.log('Added Role: ' + addRoleAnswers.roleTitle)
-    startApp();
-  })
+      db.query(sql, params);
+      console.log('Added Role: ' + addRoleAnswers.roleTitle)
+      startApp();
+    })
 };
-
 
 // view all roles func
 const viewAllRoles = () => {
@@ -166,7 +165,7 @@ const addEmployee = async () => {
       value: titles.id
     }
   })
-  
+
   const addEmployeePrompt = await inquirer.prompt([
     {
       type: 'input',
@@ -208,14 +207,14 @@ const addEmployee = async () => {
     }
   ])
 
-  .then(addEmployeeAnswers => {
-    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-    const params = [addEmployeeAnswers.employeeFirstName, addEmployeeAnswers.employeeLastName, addEmployeeAnswers.employeeRole, addEmployeeAnswers.employeeManager]
+    .then(addEmployeeAnswers => {
+      const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+      const params = [addEmployeeAnswers.employeeFirstName, addEmployeeAnswers.employeeLastName, addEmployeeAnswers.employeeRole, addEmployeeAnswers.employeeManager]
 
-    db.query(sql, params);
-    console.log('Added Employee: ' + addEmployeeAnswers.employeeFirstName + ' ' + addEmployeeAnswers.employeeLastName)
-    startApp();
-  })
+      db.query(sql, params);
+      console.log('Added Employee: ' + addEmployeeAnswers.employeeFirstName + ' ' + addEmployeeAnswers.employeeLastName)
+      startApp();
+    })
 };
 
 // view all employees func
@@ -280,14 +279,14 @@ const updateRole = async () => {
     }
   ])
 
-  .then(updateEmployeeAnswers => {
-    const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
-    const params = [updateEmployeeAnswers.employeeToUpdate, updateEmployeeAnswers.newRole]
+    .then(updateEmployeeAnswers => {
+      const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+      const params = [updateEmployeeAnswers.employeeToUpdate, updateEmployeeAnswers.newRole]
 
-    db.query(sql, params);
-    console.log('Updated Employee to new role.')
-    startApp();
-  })
+      db.query(sql, params);
+      console.log('Updated Employee to new role.')
+      startApp();
+    })
 }
 
 // **INITIAL PROMPTS**
@@ -298,7 +297,7 @@ const initPrompt = () => {
     {
       type: 'list',
       name: 'init',
-      message: "What would you like to do?",
+      message: "WHAT WOULD YOU LIKE TO DO?",
       choices: [
         'View all departments',
         'View all roles',
