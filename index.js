@@ -215,7 +215,20 @@ const addEmployee = async () => {
 
 // view all employees func
 const viewAllEmployees = () => {
-  const sql = `SELECT first_name, last_name, role_id, manager_id FROM employees`;
+  const sql = `SELECT 
+    employees.id, 
+    employees.first_name,
+    employees.last_name,
+    roles.title AS role_title, 
+    departments.title AS department,
+    roles.salary,
+    CONCAT(employees.first_name, ' ', employees.last_name) AS manager 
+
+    FROM employees
+
+    LEFT JOIN roles ON employees.role_id = roles.id
+    LEFT JOIN departments ON departments.id = roles.department_id
+    `
 
   db.query(sql, (err, rows) => {
     if (err) {
