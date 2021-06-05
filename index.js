@@ -125,8 +125,14 @@ const addRole = async () => {
 
 // view all roles func
 const viewAllRoles = () => {
-  const sql = `
-    SELECT roles.id, roles.title, roles.salary, departments.title AS department FROM roles
+  const sql = `SELECT 
+    roles.id, 
+    roles.title, 
+    roles.salary, 
+    departments.title AS department 
+    
+    FROM roles
+    
     LEFT JOIN departments ON departments.id = roles.department_id
     `
 
@@ -160,7 +166,6 @@ const addEmployee = async () => {
       value: titles.id
     }
   })
-
   
   const addEmployeePrompt = await inquirer.prompt([
     {
@@ -243,27 +248,47 @@ const viewAllEmployees = () => {
 
 // **UPDATE ROLE** (all dependent on departments table, employees table, and roles table)
 
-// inq prompt to update role
-const updateRolePrompt = () => {
-  return inquirer.prompt([
+const updateRole = async () => {
+  const getEmployees = await db.promise().query(`SELECT * FROM employees`)
+  let employeeList = getEmployees[0].map((employeeNames) => {
+    return {
+      name: employeeNames.first_name.concat(" ", employeeNames.last_name),
+      value: employeeNames.id
+    }
+  })
+
+  const getRoles = await db.promise().query(`SELECT * FROM roles`)
+  let roleList = getRoles[0].map((titles) => {
+    return {
+      name: titles.title,
+      value: titles.id
+    }
+  })
+
+  const updateRolePrompt = await inquirer.prompt([
     {
       type: 'list',
       name: 'employeeToUpdate',
       message: 'Choose the employee you want to update: ',
-      choices: [
-        // array of names of existing employees
-      ]
+      choices: employeeList
     },
     {
       type: 'list',
       name: 'newRole',
       message: 'Choose the employee\'s new role: ',
-      choices: [
-        // array of names of existing roles
-      ]
+      choices: roleList
     }
   ])
-};
+
+  .then(updateEmployeeAnswers => {
+    const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+    const params = [updateEmployeeAnswers.employeeToUpdate, updateEmployeeAnswers.newRole]
+
+    db.query(sql, params);
+    console.log('Updated Employee to new role.')
+    startApp();
+  })
+}
 
 // **INITIAL PROMPTS**
 
