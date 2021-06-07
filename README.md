@@ -5,7 +5,7 @@ Employee Database Command-Line Application
 * [Description](#description)
 * [Installation](#installation)
 * [Usage](#usage)
-* [Walkthrough] (#walkthrough)
+* [Walkthrough](#walkthrough)
 * [Contributors](#contributors)
 
 # Description
